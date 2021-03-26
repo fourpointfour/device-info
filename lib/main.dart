@@ -1,19 +1,30 @@
 import 'package:device_info/stateNotifier.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'myTheme.dart';
 
 void main()
 {
-  runApp(MyApp());
+  runApp(
+    ChangeNotifierProvider<AppStateNotifier>(
+      create: (context) => AppStateNotifier(),
+      child: MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      theme: ThemeData.light(),
-      darkTheme: ThemeData.dark(),
-      home: HomePage(),
+    return Consumer<AppStateNotifier>(
+      builder: (context, appState, child){
+        return MaterialApp(
+          theme: MyTheme.lightTheme,
+          darkTheme: MyTheme.darkTheme,
+          themeMode: appState.currentTheme(),
+          home: HomePage(),
+        );
+      },
     );
   }
 }
