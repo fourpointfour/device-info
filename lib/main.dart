@@ -1,3 +1,7 @@
+import 'dart:async';
+
+import 'package:battery/battery.dart';
+import 'package:device_info/containers.dart';
 import 'package:device_info/stateNotifier.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -36,6 +40,28 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  final Battery _battery = Battery();
+  var _batteryLevel;
+  BatteryState ? _batteryState;
+  late StreamSubscription<BatteryState> _batteryStateSubscription;
+
+  @override
+  void initState(){
+    super.initState();
+    _batteryStateSubscription = _battery.onBatteryStateChanged.listen((state) {
+      setState(() async{
+        _batteryState = state;
+        _batteryLevel = await _battery.batteryLevel;
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _batteryStateSubscription.cancel();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -54,41 +80,7 @@ class _HomePageState extends State<HomePage> {
           ],
         ),
         body: SafeArea(
-          child: Container(
-            margin: EdgeInsets.only(top: 15, left: 10, right: 10),
-            padding: EdgeInsets.all(10),
-            height: 80,
-            width: MediaQuery.of(context).size.width,
-            decoration: BoxDecoration(
-              color: Theme.of(context).scaffoldBackgroundColor,
-              borderRadius: BorderRadius.all(Radius.circular(10)),
-              boxShadow: [
-                BoxShadow(
-                  offset: Offset(2, 2),
-                  color: Theme.of(context).shadowColor,
-                  spreadRadius: 3,
-                  blurRadius: 2,
-                ),
-                BoxShadow(
-                  offset: Offset(-2, -2),
-                  color: Colors.white,
-                  spreadRadius: 1,
-                  blurRadius: 3,
-                ),
-              ],
-            ),
-            child: GestureDetector(
-              onTap: () => openSnackBar(context, 'Card tapped!'),
-              child: Card(
-                elevation: 0,
-                color: Theme.of(context).scaffoldBackgroundColor,
-                child: Text(
-                  'Hey, this is a card...',
-                  style: Theme.of(context).textTheme.headline6,
-                ),
-          ),
-            ),
-          ),
+          child: CardForData(dataForCard: 'Battery: ${_batteryLevel}%',),
         ),
       ),
     );
