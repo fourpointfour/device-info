@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 
-class CardForData extends StatefulWidget {
+class BatteryCard extends StatefulWidget {
   final String? dataForCard;
-  CardForData({this.dataForCard});
+  final String? dataSubtitle;
+  BatteryCard({this.dataForCard, this.dataSubtitle});
 
   @override
-  _CardForDataState createState() => _CardForDataState();
+  _BatteryCardState createState() => _BatteryCardState();
 }
 
-class _CardForDataState extends State<CardForData> {
+class _BatteryCardState extends State<BatteryCard> {
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -37,9 +38,17 @@ class _CardForDataState extends State<CardForData> {
       child: Card(
         elevation: 0,
         color: Theme.of(context).scaffoldBackgroundColor,
-        child: Text(
-          '${widget.dataForCard}',
-          style: Theme.of(context).textTheme.headline6,
+        child: Column(
+          children: [
+            Text(
+              'Battery Level: ${widget.dataForCard}%',
+              style: Theme.of(context).textTheme.headline6,
+            ),
+            Text(
+              'Battery Status: ${widget.dataSubtitle}%',
+              style: Theme.of(context).textTheme.headline6,
+            ),
+          ],
         ),
       ),
     );
