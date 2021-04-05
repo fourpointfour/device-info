@@ -1,11 +1,11 @@
 import 'dart:async';
 import 'package:battery/battery.dart';
-import 'package:device_info/circularButton.dart';
 import 'package:device_info/containers.dart';
 import 'package:device_info/stateNotifier.dart';
-import 'package:flashlight/flashlight.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+// ignore: import_of_legacy_library_into_null_safe
+import 'package:lamp/lamp.dart';
 import 'myTheme.dart';
 
 void main()
@@ -50,7 +50,7 @@ class _HomePageState extends State<HomePage> {
   bool _isFlashOn = false;
 
   void initFlashLight() async{
-    bool hasFlash = await Flashlight.hasFlashlight;
+    bool hasFlash = await Lamp.hasLamp;
     if(!hasFlash){
       openSnackBar(context, "Device doesn't have Flashlight");
     }
@@ -62,6 +62,7 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState(){
     super.initState();
+    initFlashLight();
     _batteryStateSubscription = _battery.onBatteryStateChanged.listen((state) {
       setState(() async{
         _batteryState = state;
@@ -106,16 +107,34 @@ class _HomePageState extends State<HomePage> {
                   children: [
                     TextButton(
                       child: Expanded(
-                        child: FittedBox(
-                          fit: BoxFit.fill,
-                          child: Icon(
-                            Icons.flash_on_sharp,
-                            color: Theme.of(context).scaffoldBackgroundColor,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            boxShadow: [
+                              BoxShadow(
+                                offset: Offset(2, 2),
+                                color: Theme.of(context).shadowColor,
+                                spreadRadius: 3,
+                                blurRadius: 2,
+                              ),
+                              BoxShadow(
+                                offset: Offset(-2, -2),
+                                color: Colors.white,
+                                spreadRadius: 1,
+                                blurRadius: 3,
+                              ),
+                            ]
+                          ),
+                          child: FittedBox(
+                            fit: BoxFit.fill,
+                            child: Icon(
+                              Icons.flash_on_sharp,
+                              color: Theme.of(context).scaffoldBackgroundColor,
+                            ),
                           ),
                         ),
                       ),
                       onPressed: () async {
-                        _isFlashOn ? await Flashlight.lightOff() : await Flashlight.lightOn();
+                        _isFlashOn ? await Lamp.turnOn() : await Lamp.turnOff();
                         setState(() {
                           _isFlashOn = !_isFlashOn;
                         });

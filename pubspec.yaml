@@ -30,7 +30,7 @@ dependencies:
   cupertino_icons: ^1.0.2
   provider: ^5.0.0
   battery: ^2.0.1
-  flashlight: ^0.1.1
+  lamp: ^0.0.6
 
 dev_dependencies:
   flutter_test:
