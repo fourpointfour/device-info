@@ -3,9 +3,10 @@ import 'package:battery/battery.dart';
 import 'package:device_info/containers.dart';
 import 'package:device_info/stateNotifier.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 // ignore: import_of_legacy_library_into_null_safe
-import 'package:lamp/lamp.dart';
+// import 'package:lamp/lamp.dart';
 import 'myTheme.dart';
 
 void main()
@@ -42,31 +43,24 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   final Battery _battery = Battery();
   var _batteryLevel;
-  BatteryState ? _batteryState;
+  String? _batteryState;
   late StreamSubscription<BatteryState> _batteryStateSubscription;
-
+  static const platform = const MethodChannel('com.device_info.app/vaibhav');
   // flashlight related variables
   bool _hasFlashLight = false;
   bool _isFlashOn = false;
 
-  void initFlashLight() async{
-    bool hasFlash = await Lamp.hasLamp;
-    if(!hasFlash){
-      openSnackBar(context, "Device doesn't have Flashlight");
-    }
-    setState(() {
-      _hasFlashLight = hasFlash;
-    });
+  void getBatteryLevel() async{
+    _batteryLevel = await _battery.batteryLevel;
   }
 
   @override
   void initState(){
     super.initState();
-    initFlashLight();
     _batteryStateSubscription = _battery.onBatteryStateChanged.listen((state) {
-      setState(() async{
-        _batteryState = state;
-        _batteryLevel = await _battery.batteryLevel;
+      setState((){
+        _batteryState = (state == BatteryState.charging) ? 'Charging' : 'Discharging';
+        getBatteryLevel();
       });
     });
   }
@@ -77,6 +71,14 @@ class _HomePageState extends State<HomePage> {
     _batteryStateSubscription.cancel();
   }
 
+  Future<void> _toggleTorch(val) async{
+    String resultMessage;
+    try {
+      resultMessage = await platform.invokeMethod('toggleTorch', {'torchValue': val});
+    } on PlatformException catch(e) {
+      print('Failed to turn on Flashlight. ERROR: ${e.message}');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -99,48 +101,31 @@ class _HomePageState extends State<HomePage> {
           child: Column(
             children: [
               BatteryCard(dataForCard: _batteryLevel.toString(),
-                dataSubtitle: _batteryState.toString()),
+                dataSubtitle: _batteryState),
               SizedBox(height: 10,),
               Container(
-                padding: EdgeInsets.all(5),
-                child: Row(
-                  children: [
-                    TextButton(
-                      child: Expanded(
-                        child: Container(
-                          decoration: BoxDecoration(
-                            boxShadow: [
-                              BoxShadow(
-                                offset: Offset(2, 2),
-                                color: Theme.of(context).shadowColor,
-                                spreadRadius: 3,
-                                blurRadius: 2,
-                              ),
-                              BoxShadow(
-                                offset: Offset(-2, -2),
-                                color: Colors.white,
-                                spreadRadius: 1,
-                                blurRadius: 3,
-                              ),
-                            ]
-                          ),
-                          child: FittedBox(
-                            fit: BoxFit.fill,
-                            child: Icon(
-                              Icons.flash_on_sharp,
-                              color: Theme.of(context).scaffoldBackgroundColor,
-                            ),
-                          ),
-                        ),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).scaffoldBackgroundColor,
+                    boxShadow: [
+                      BoxShadow(
+                        offset: Offset(2, 2),
+                        color: Theme.of(context).shadowColor,
+                        spreadRadius: 3,
+                        blurRadius: 2,
                       ),
-                      onPressed: () async {
-                        _isFlashOn ? await Lamp.turnOn() : await Lamp.turnOff();
-                        setState(() {
-                          _isFlashOn = !_isFlashOn;
-                        });
-                      },
-                    )
-                  ],
+                    ]
+                  ),
+                  child: ElevatedButton(
+                    onPressed: () async{
+                      await _toggleTorch(!_isFlashOn);
+                      _isFlashOn = !_isFlashOn;
+                    },
+                    child: Icon(
+                      Icons.flash_on_sharp,
+                      size: 20,
+                    ),
+                  ),
                 ),
               ),
             ],
@@ -150,6 +135,8 @@ class _HomePageState extends State<HomePage> {
     );
   }
 }
+
+
 
 void openSnackBar(context, changeMessage)
 {

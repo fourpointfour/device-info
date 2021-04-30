@@ -10,6 +10,7 @@ class BatteryCard extends StatefulWidget {
 }
 
 class _BatteryCardState extends State<BatteryCard> {
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -45,7 +46,7 @@ class _BatteryCardState extends State<BatteryCard> {
               style: Theme.of(context).textTheme.headline6,
             ),
             Text(
-              'Battery Status: ${widget.dataSubtitle}%',
+              'Battery Status: ${widget.dataSubtitle}',
               style: Theme.of(context).textTheme.headline6,
             ),
           ],
