@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:battery/battery.dart';
-import 'package:device_info/containers.dart';
+import 'package:device_info/batteryCard.dart';
 import 'package:device_info/stateNotifier.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -75,6 +75,7 @@ class _HomePageState extends State<HomePage> {
     String resultMessage;
     try {
       resultMessage = await platform.invokeMethod('toggleTorch', {'torchValue': val});
+      print(resultMessage);
     } on PlatformException catch(e) {
       print('Failed to turn on Flashlight. ERROR: ${e.message}');
     }
@@ -92,7 +93,6 @@ class _HomePageState extends State<HomePage> {
               value: Provider.of<AppStateNotifier>(context).isDark,
               onChanged: (darkMode){
                 Provider.of<AppStateNotifier>(context, listen: false).updateTheme(darkMode);
-                openSnackBar(context, 'Theme changed!');
               },
             )
           ],
@@ -102,30 +102,75 @@ class _HomePageState extends State<HomePage> {
             children: [
               BatteryCard(dataForCard: _batteryLevel.toString(),
                 dataSubtitle: _batteryState),
-              SizedBox(height: 10,),
-              Container(
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).scaffoldBackgroundColor,
-                    boxShadow: [
-                      BoxShadow(
-                        offset: Offset(2, 2),
-                        color: Theme.of(context).shadowColor,
-                        spreadRadius: 3,
-                        blurRadius: 2,
+              SizedBox(height: 20,),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Container(
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Theme.of(context).scaffoldBackgroundColor,
+                        boxShadow: [
+                          BoxShadow(
+                            offset: Offset(2, 2),
+                            color: Theme.of(context).shadowColor,
+                            spreadRadius: 3,
+                            blurRadius: 2,
+                          ),
+                          BoxShadow(
+                            offset: Offset(-2, -2),
+                            color: Colors.white,
+                            spreadRadius: 1,
+                            blurRadius: 3,
+                          ),
+                        ]
                       ),
-                    ]
-                  ),
-                  child: ElevatedButton(
-                    onPressed: () async{
-                      await _toggleTorch(!_isFlashOn);
-                      _isFlashOn = !_isFlashOn;
-                    },
-                    child: Icon(
-                      Icons.flash_on_sharp,
-                      size: 20,
+                      child: TextButton(
+                        onPressed: () async{
+                          await _toggleTorch(!_isFlashOn);
+                          _isFlashOn = !_isFlashOn;
+                        },
+                        child: Icon(
+                          Icons.flash_on_sharp,
+                          size: 40,
+                          color: Theme.of(context).buttonColor,
+                        ),
+                      ),
                     ),
-                  ),
+                    // container for showing snackbar
+                    Container(
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            offset: Offset(2, 2),
+                            color: Theme.of(context).shadowColor,
+                            spreadRadius: 3,
+                            blurRadius: 2,
+                          ),
+                          BoxShadow(
+                            offset: Offset(-2, -2),
+                            color: Colors.white,
+                            spreadRadius: 1,
+                            blurRadius: 3,
+                          ),
+                        ],
+                        color: Theme.of(context).scaffoldBackgroundColor,
+                      ),
+                      child: TextButton(
+                        onPressed: (){
+                          openSnackBar(context, 'Custom Snackbar!');
+                        },
+                        child: Icon(
+                          Icons.play_circle_filled_sharp,
+                          color: Theme.of(context).buttonColor,
+                          size: 40,
+                        ),
+                      )
+                    ),
+                  ],
                 ),
               ),
             ],
